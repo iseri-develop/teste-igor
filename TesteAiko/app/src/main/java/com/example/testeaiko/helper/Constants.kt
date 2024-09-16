@@ -1,4 +1,4 @@
-package com.example.testeaiko.service
+package com.example.testeaiko.helper
 
 class Constants {
     object HEADER {
