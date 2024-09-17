@@ -223,8 +223,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     binding.textSearchButton.visibility = View.GONE
                     binding.textClearButton.visibility = View.GONE
 
-                    binding.progressBar.visibility = View.GONE
-
                     binding.expandActivitiesButton.shrink()
 
                     false
@@ -239,9 +237,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             binding.stopButton -> {
-                binding.progressBar.visibility = View.VISIBLE
 
                 val dialogFragmentStop = DialogFragmentStop(onDismiss = { filter ->
+                    binding.progressBar.visibility = View.VISIBLE
                     viewModel.listStops(filter)
                 })
                 dialogFragmentStop.show(supportFragmentManager, "DialogFragmentStop")
