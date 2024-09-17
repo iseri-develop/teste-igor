@@ -3,6 +3,7 @@ package com.example.testeaiko.service.repository
 import android.content.Context
 import com.example.testeaiko.helper.Constants
 import com.example.testeaiko.service.listener.APIListener
+import com.example.testeaiko.service.model.ArrivalForecastModel
 import com.example.testeaiko.service.model.LineModel
 import com.example.testeaiko.service.model.PositionVehicleModel
 import com.example.testeaiko.service.model.StopModel
@@ -27,5 +28,9 @@ class TransportRepository(context: Context) : BaseRepository(context) {
 
     fun getLine(filter: String, listener: APIListener<List<LineModel>>) {
         executeCall(remote.getLines(filter), listener)
+    }
+
+    fun getArrivalForecast(idStop: Int, listener: APIListener<ArrivalForecastModel>) {
+        executeCall(remote.getArrivalForecast(idStop), listener)
     }
 }

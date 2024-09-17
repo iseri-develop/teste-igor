@@ -1,5 +1,6 @@
 package com.example.testeaiko.service.repository
 
+import com.example.testeaiko.service.model.ArrivalForecastModel
 import com.example.testeaiko.service.model.LineModel
 import com.example.testeaiko.service.model.PositionVehicleModel
 import com.example.testeaiko.service.model.StopModel
@@ -26,4 +27,7 @@ interface TransportService {
     @GET("Linha/Buscar")
     fun getLines(@Query("termosBusca") filter: String?): Call<List<LineModel>>
 
+    //Previsão de Chegada
+    @GET("Previsao/Parada")
+    fun getArrivalForecast(@Query("codigoParada") idStop: Int): Call<ArrivalForecastModel>
 }

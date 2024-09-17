@@ -1,11 +1,8 @@
 package com.example.testeaiko.view
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.view.View.OnClickListener
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -14,6 +11,7 @@ import com.example.testeaiko.R
 import com.example.testeaiko.databinding.ActivityMainBinding
 import com.example.testeaiko.helper.BitmapHelper
 import com.example.testeaiko.service.model.MarkerModel
+import com.example.testeaiko.view.adapter.CustomMarkerInfoStopAdapter
 import com.example.testeaiko.viewmodel.MainViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -72,10 +70,26 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private fun setupMap(
         mapFragment: SupportMapFragment,
         listMarker: MutableList<MarkerModel>,
+        isNewConsult: Boolean,
         isVehicle: Boolean
     ) {
         mapFragment.getMapAsync { googleMap ->
-            googleMap.clear()
+
+            if (isNewConsult) {
+                googleMap.clear()
+            }
+
+            if (!isVehicle) {
+                googleMap.setInfoWindowAdapter(CustomMarkerInfoStopAdapter(this))
+
+                googleMap.setOnInfoWindowClickListener { marker ->
+                    val markerModel = marker.tag as? MarkerModel ?: return@setOnInfoWindowClickListener
+                    viewModel.arrivalForecast(markerModel.idStop)
+                }
+            } else {
+                googleMap.setInfoWindowAdapter(null)
+            }
+
             addMarkersToMap(googleMap, listMarker, isVehicle)
 
             // Configura a exibição do mapa
@@ -87,6 +101,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 100))
             }
         }
+
+        // Configura a exibição do progress
+        binding.progressBar.visibility = View.GONE
     }
 
     private fun addMarkersToMap(
@@ -99,7 +116,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             // Adicione marcadores ao mapa
             listMarker.forEach {
                 if (isVehicle) {
-                    googleMap.addMarker(
+                    val marker = googleMap.addMarker(
                         MarkerOptions()
                             .position(it.position)
                             .title(it.title)
@@ -112,13 +129,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                                 )
                             )
                     )
+
+                    marker?.tag = it
                 } else {
-                    googleMap.addMarker(
+                    val marker = googleMap.addMarker(
                         MarkerOptions()
                             .position(it.position)
                             .title(it.title)
                             .snippet(it.snippet)
                     )
+
+                    marker?.tag = it
                 }
             }
         }
@@ -132,13 +153,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             stops.forEach { stop ->
                 MarkerModel().apply {
                     this.position = LatLng(stop.latitudeStop, stop.longitudeStop)
+                    this.idStop = stop.idStop
                     this.title = stop.nameStop
                     this.snippet = stop.addressStop
                     listMarker.add(this)
                 }
             }
 
-            setupMap(mapFragment, listMarker, false)
+            setupMap(mapFragment, listMarker, isNewConsult = true, isVehicle = false)
         }
 
         viewModel.vehicles.observe(this) { vehicles ->
@@ -153,7 +175,24 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
             }
 
-            setupMap(mapFragment, listMarker, true)
+            setupMap(mapFragment, listMarker, isNewConsult = true, isVehicle = true)
+        }
+
+        viewModel.listArrivalForecast.observe(this) { arrivalForecast ->
+            listMarker.clear()
+
+            arrivalForecast.forEach { line ->
+                line.listVehicles.forEach { vehicle ->
+                    MarkerModel().apply {
+                        this.position = LatLng(vehicle.latitude, vehicle.longitude)
+                        this.title = "Prefix: ${vehicle.prefix}"
+                        this.snippet = "Arrival forecast: ${vehicle.expectedTime}"
+                        listMarker.add(this)
+                    }
+                }
+            }
+
+            setupMap(mapFragment, listMarker, isNewConsult = false, isVehicle = true)
         }
     }
 
@@ -184,6 +223,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     binding.textSearchButton.visibility = View.GONE
                     binding.textClearButton.visibility = View.GONE
 
+                    binding.progressBar.visibility = View.GONE
+
                     binding.expandActivitiesButton.shrink()
 
                     false
@@ -191,11 +232,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             binding.positionVehiclesButton -> {
+                binding.progressBar.visibility = View.VISIBLE
+
                 viewModel.listPositionVehicles()
                 binding.expandActivitiesButton.performClick()
             }
 
             binding.stopButton -> {
+                binding.progressBar.visibility = View.VISIBLE
 
                 val dialogFragmentStop = DialogFragmentStop(onDismiss = { filter ->
                     viewModel.listStops(filter)
@@ -210,8 +254,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             binding.clearButton -> {
+                binding.progressBar.visibility = View.VISIBLE
+
                 listMarker.clear()
-                setupMap(mapFragment, listMarker, false)
+                setupMap(mapFragment, listMarker, isNewConsult = true, isVehicle = false)
                 binding.expandActivitiesButton.performClick()
             }
         }

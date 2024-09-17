@@ -49,6 +49,7 @@ class LineModel {
     @SerializedName("qv")
     val qtdeVehicle: Int = 0
 
+    // Lista de veículos
     @SerializedName("vs")
     val listVehicles: List<VehicleModel> = listOf()
 }

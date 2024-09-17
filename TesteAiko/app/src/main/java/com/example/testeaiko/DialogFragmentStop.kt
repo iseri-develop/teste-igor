@@ -8,7 +8,7 @@ import androidx.fragment.app.DialogFragment
 import com.example.testeaiko.databinding.FragmentDialogStopBinding
 
 class DialogFragmentStop(
-    val onDismiss: (String) -> Unit = {}
+    val onDismiss: (String) -> Unit
 ) : DialogFragment() {
 
     private var _binding: FragmentDialogStopBinding? = null

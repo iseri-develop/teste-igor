@@ -10,4 +10,5 @@ class MarkerModel {
 
     var position: LatLng = LatLng(0.0, 0.0)
 
+    var idStop: Int = 0
 }

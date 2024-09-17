@@ -7,6 +7,9 @@ class VehicleModel {
     @SerializedName("p")
     val prefix: Int = 0
 
+    @SerializedName("t")
+    val expectedTime: String = ""
+
     @SerializedName("a")
     val accesibleDisable: Boolean = false
 

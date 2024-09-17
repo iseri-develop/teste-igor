@@ -31,29 +31,8 @@ open class BaseRepository(val context: Context) {
 
             override fun onFailure(call: Call<T>, t: Throwable) {
                 listener.onFailure(context.getString(R.string.ERROR_UNEXPECTED))
+                Log.e("onFailure", t.message.toString())
             }
         })
-    }
-
-    /**
-     * Verifica se existe conexão com internet
-     */
-    fun isConnectionAvailable(): Boolean {
-        var result = false
-
-        // Gerenciador de conexão
-        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        // Verifica versão do sistema rodando a aplicação
-        val activeNet = cm.activeNetwork ?: return false
-        val netWorkCapabilities = cm.getNetworkCapabilities(activeNet) ?: return false
-
-        result = when {
-            netWorkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            netWorkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            else -> false
-        }
-
-        return result
     }
 }

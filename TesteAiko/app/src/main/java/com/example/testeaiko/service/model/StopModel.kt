@@ -19,4 +19,6 @@ class StopModel {
     @SerializedName("px")
     val longitudeStop: Double = 0.0
 
+    @SerializedName("l")
+    val listLines: List<LineModel> = listOf()
 }
